@@ -2,7 +2,7 @@ const knex = require('knex');
 const app = require('../src/app');
 const helpers = require('./test-helpers');
 
-describe.only('Protected endpoints', function() {
+describe('Protected endpoints', function() {
   let db;
 
   const { testUsers, testThings, testReviews } = helpers.makeThingsFixtures();
@@ -63,22 +63,11 @@ describe.only('Protected endpoints', function() {
           .expect(401, { error: 'Unauthorized request' });
       });
 
-      it('responds 401 \'Unauthorized request\' when invalid user', () => {
-        const userInvalidCreds = { user_name: 'user-not', password: 'existy' };
+      it('responds 401 \'Unauthorized request\' when invalid sub in payload', () => {
+        const invalidUser = { user_name: 'user-not-existy', id: 1 };
         return endpoint
           .method(endpoint.path)
-          .set('Authorization', helpers.makeAuthHeader(userInvalidCreds))
-          .expect(401, { error: 'Unauthorized request' });
-      });
-
-      it.skip('responds 401 \'Unauthorized request\' when invalid password', () => {
-        const userInvalidPass = {
-          user_name: testUsers[0].user_name,
-          password: 'wrong'
-        };
-        return endpoint
-          .method(endpoint.path)
-          .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
+          .set('Authorization', helpers.makeAuthHeader(invalidUser))
           .expect(401, { error: 'Unauthorized request' });
       });
     });
