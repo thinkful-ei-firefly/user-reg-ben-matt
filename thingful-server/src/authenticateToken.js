@@ -1,7 +1,8 @@
 /* eslint-disable strict */
+const bcrypt = require('bcryptjs');
+const AuthService = require('./auth/auth-service')
 function authenticateToken(req, res, next) {
-
-  const authToken = req.get('Authorization') || '';
+  let authToken = req.get('Authorization') || '';
   let basicToken;
 
   if (!authToken.toLowerCase().startsWith('basic')) {
@@ -26,9 +27,15 @@ function authenticateToken(req, res, next) {
       if (!user) {
         return res.status(401).json({ error: 'Unauthorized request'});
       }
-      req.user = user;
-      console.log(user);
-      next();
+      return AuthService.comparePasswords(tokenPassword, user.password)
+        .then(passwordsMatch => {
+          if (!passwordsMatch) {
+            return res.status(401).json({ error: 'Unauthorized request: Wrong Password' })
+          }
+        
+          req.user = user;
+          next();
+        });
     })
     .catch(next);
 
